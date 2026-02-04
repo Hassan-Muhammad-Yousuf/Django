@@ -52,11 +52,11 @@ class Customer(models.Model):
     birth_date = models.DateField(null=True)
     membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICE, default= MEMBERSHIP_BRONZE)
 
-    # def __str__(self):
-    #     return self.first_name
-    
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
     class Meta:
-        ordering = ['first_name']
+        ordering = ['first_name', 'last_name']
 
 
 class Order(models.Model):
