@@ -13,11 +13,21 @@ from store.models import Product, Customer, OrderItem, Order, Collection
 
 def farm(request):
     
-    # collection = Collection()
-    # collection.title = 'Video Games'
-    # collection.featured_product = Product(pk= 12)
+    # collection = Collection.objects.get(pk = 11)
+    # collection.title = 'Games'
+    # collection.featured_product = None
     # collection.save()
-    # collection.id
+    #  collection.id
+    
+    
+    # Collection.objects.filter(pk = 27).update(featured_product = None)
+    
+    
+    # collection = Collection(pk = 11)
+    # collection.title = 'Games'
+    # collection.featured_product = None
+    # collection.save()
+    # #  collection.id
     
     # collection1 = Collection.objects.create(title = 'Tech Gadgets', featured_product_id = 13)
     # collection1.id
@@ -60,4 +70,4 @@ def farm(request):
     # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
     # queryset =  Product.objects.prefetch_related('promotions').select_related('collection').all()
     
-    return render(request, "index.html", {"name": "Hassan", 'tag' : list(queryset)})
+    return render(request, "index.html", {"name": "Hassan"})
