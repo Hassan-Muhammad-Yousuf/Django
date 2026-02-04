@@ -52,6 +52,12 @@ class Customer(models.Model):
     birth_date = models.DateField(null=True)
     membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICE, default= MEMBERSHIP_BRONZE)
 
+    # def __str__(self):
+    #     return self.first_name
+    
+    class Meta:
+        ordering = ['first_name']
+
 
 class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
