@@ -5,15 +5,20 @@ from django.contrib.contenttypes.models import ContentType
 # from django.db.models.aggregates import Count,Max,Min,Avg
 # from django.db.models import Value, F, Func, ExpressionWrapper, DecimalField
 # # from django.db.models.functions import Concat
-from store.models import Product, Customer
-from tags.models import TaggedItem
+from store.models import Product, Customer, OrderItem, Order
+# from tags.models import TaggedItem
 
 
 # Create your views here.
 
 def farm(request):
     
-    TaggedItem.objects.get_tags_for(Product, 1)
+    queryset = Product.objects.all()
+    queryset[0]
+    list(queryset)
+    
+    
+    # TaggedItem.objects.get_tags_for(Product, 1)
     
     
     # content_type = ContentType.objects.get_for_model(Product)
@@ -44,4 +49,4 @@ def farm(request):
     # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
     # queryset =  Product.objects.prefetch_related('promotions').select_related('collection').all()
     
-    return render(request, "index.html", {"name": "Hassan", 'tag' : list(quarry_set)})
+    return render(request, "index.html", {"name": "Hassan", 'tag' : list(queryset)})
