@@ -1,11 +1,11 @@
 from django.shortcuts import render
-from django.contrib.contenttypes.models import ContentType
+# from django.contrib.contenttypes.models import ContentType
 # # The commented lines in the code are importing various modules and classes from Django's database
 # models to perform operations on the database. Here is a breakdown of each import statement:
 # from django.db.models.aggregates import Count,Max,Min,Avg
 # from django.db.models import Value, F, Func, ExpressionWrapper, DecimalField
 # # from django.db.models.functions import Concat
-from store.models import Product, Customer, OrderItem, Order
+from store.models import Product, Customer, OrderItem, Order, Collection
 # from tags.models import TaggedItem
 
 
@@ -13,9 +13,20 @@ from store.models import Product, Customer, OrderItem, Order
 
 def farm(request):
     
-    queryset = Product.objects.all()
-    queryset[0]
-    list(queryset)
+    # collection = Collection()
+    # collection.title = 'Video Games'
+    # collection.featured_product = Product(pk= 12)
+    # collection.save()
+    # collection.id
+    
+    # collection1 = Collection.objects.create(title = 'Tech Gadgets', featured_product_id = 13)
+    # collection1.id
+    
+    # queryset = Collection.objects.filter(featured_product = 13).delete()
+    
+    # queryset = Product.objects.all()
+    # queryset[0]
+    # list(queryset)
     
     
     # TaggedItem.objects.get_tags_for(Product, 1)
