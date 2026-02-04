@@ -1,7 +1,9 @@
-from django.contrib import admin, messages
+from django.contrib import admin, messages 
+from django.contrib.contenttypes.admin import GenericTabularInline 
 from django.db.models import Count
 from django.utils.html import format_html , urlencode
 from django.urls import reverse
+from tags.models import TaggedItem
 from . import models
 # Register your models here.
 
@@ -38,8 +40,13 @@ class CustomerAdmin(admin.ModelAdmin):
         return ", ".join(products) if products else "-"
 
 
+class TagInLine(GenericTabularInline):
+    autocomplete_fields = ['tag']
+    model = TaggedItem
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
+    inlines = [TagInLine]
     search_fields = ['title']
     autocomplete_fields = ['collection']
     prepopulated_fields = {
