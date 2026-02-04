@@ -40,6 +40,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
+    search_fields = ['title']
     autocomplete_fields = ['collection']
     prepopulated_fields = {
         'slug': ['title']
@@ -70,11 +71,20 @@ class ProductAdmin(admin.ModelAdmin):
             messages.ERROR
         )
 
+
+class OrderItemInline(admin.TabularInline):
+    model = models.OrderItem
+    min_num = 1
+    max_num = 100
+    autocomplete_fields = ['product']
+    extra = 0
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'customer', 'placed_at' ,'payment_status']
     list_editable = ['payment_status']
     autocomplete_fields = ['customer']
+    inlines = [OrderItemInline]
     
 
 
