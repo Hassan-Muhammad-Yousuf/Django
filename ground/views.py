@@ -7,17 +7,31 @@ from django.shortcuts import render
 # # from django.db.models.functions import Concat
 from store.models import Product, Customer, OrderItem, Order, Collection
 # from tags.models import TaggedItem
+from django.db import transaction
 
 
 # Create your views here.
 
+
 def farm(request):
     
+    with transaction.atomic():
+        order = Order()
+        order.customer_id = 1005
+        order.save()
+
+        item = OrderItem()
+        item.order = order
+        item.product_id = -10
+        item.quantity = 1
+        item.unit_price = 1200
+        item.save()
+
     # collection = Collection.objects.get(pk = 11)
     # collection.title = 'Games'
     # collection.featured_product = None
     # collection.save()
-    #  collection.id
+    # collection.id
     
     
     # Collection.objects.filter(pk = 27).update(featured_product = None)
