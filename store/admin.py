@@ -5,6 +5,19 @@ from django.urls import reverse
 from . import models
 # Register your models here.
 
+class InventoryFilter(admin.SimpleListFilter):
+    title = 'inventory'
+    parameter_name = 'inventory'
+    
+    def lookups(self, request, model_admin):
+        return [
+            ('<10', 'low')
+        ]
+        
+    def queryset(self, request, queryset):
+        if self.value == '<10':
+            return queryset.filter(inventory__lt = 10)
+
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['first_name','last_name','membership','ordered_products']
@@ -29,6 +42,7 @@ class CustomerAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
     list_editable = ['unit_price']
+    list_filter = ['collection', 'last_updates', InventoryFilter]
     list_per_page = 5
     list_select_related = ['collection']
     
