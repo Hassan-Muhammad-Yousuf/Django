@@ -7,25 +7,28 @@ from django.shortcuts import render
 # # from django.db.models.functions import Concat
 from store.models import Product, Customer, OrderItem, Order, Collection
 # from tags.models import TaggedItem
-from django.db import transaction
+# from django.db import transaction
 
 
 # Create your views here.
 
 
 def farm(request):
-    
-    with transaction.atomic():
-        order = Order()
-        order.customer_id = 1005
-        order.save()
 
-        item = OrderItem()
-        item.order = order
-        item.product_id = -10
-        item.quantity = 1
-        item.unit_price = 1200
-        item.save()
+    queryset = Product.objects.raw('Select * From store_product')
+
+    
+    # with transaction.atomic():
+    #     order = Order()
+    #     order.customer_id = 1005
+    #     order.save()
+
+    #     item = OrderItem()
+    #     item.order = order
+    #     item.product_id = -10
+    #     item.quantity = 1
+    #     item.unit_price = 1200
+    #     item.save()
 
     # collection = Collection.objects.get(pk = 11)
     # collection.title = 'Games'
@@ -84,4 +87,4 @@ def farm(request):
     # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
     # queryset =  Product.objects.prefetch_related('promotions').select_related('collection').all()
     
-    return render(request, "index.html", {"name": "Hassan"})
+    return render(request, "index.html", {"name": "Hassan", 'result': list(queryset)})
