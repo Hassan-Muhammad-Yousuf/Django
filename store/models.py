@@ -1,4 +1,22 @@
 from django.db import models
+"""
+models.py
+This module contains the Django models for an e-commerce application. The models represent the core entities of the application, including promotions, collections, products, customers, orders, addresses, carts, and cart items.
+Classes:
+    - Promotion: Represents a promotional offer with a description and discount.
+    - Collection: Represents a collection of products, with a title and a featured product.
+    - Product: Represents a product with attributes such as title, slug, description, unit price, inventory, last updates, collection, and promotions.
+    - Customer: Represents a customer with personal details and membership status.
+    - Order: Represents an order placed by a customer, including payment status and associated customer.
+    - OrderItem: Represents an item in an order, including the product and quantity.
+    - Address: Represents a customer's address with street, city, zip code, and associated customer.
+    - Cart: Represents a shopping cart with a creation timestamp.
+    - CartItem: Represents an item in a cart, including the product and quantity.
+References:
+    - Django Documentation: https://docs.djangoproject.com/en/stable/topics/db/models/
+    - Django Validators: https://docs.djangoproject.com/en/stable/ref/validators/
+    - Django Model Field Reference: https://docs.djangoproject.com/en/stable/ref/models/fields/
+"""
 from django.core.validators import MinValueValidator
 
 # Create your models here.
@@ -10,7 +28,11 @@ class Promotion(models.Model):
 class Collection(models.Model):
     title = models.CharField(max_length=255) 
     featured_product = models.ForeignKey(
-        'Product', on_delete=models.SET_NULL, null=True, related_name='+')
+        'Product', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='+'
+    )
     
     def __str__(self):
         return self.title
@@ -103,4 +125,5 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
+
 

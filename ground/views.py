@@ -1,4 +1,25 @@
 from django.shortcuts import render
+"""
+views.py
+This module contains the view functions for the Django application, specifically for handling 
+requests related to the farm functionality. It includes various commented-out code snippets 
+demonstrating different database operations using Django's ORM.
+Imports:
+- render: A shortcut function to render templates.
+- connection: Provides access to the database connection for executing raw SQL queries.
+- Product, Customer, OrderItem, Order, Collection: Models representing the application's 
+    data structure.
+View Functions:
+- farm(request): 
+        Handles the HTTP request for the farm view. It currently renders the "index.html" 
+        template with a context dictionary containing a name and a result set. The result set 
+        is derived from various commented-out queryset examples that demonstrate how to interact 
+        with the database, including creating, updating, deleting, and querying objects.
+References:
+- Django Documentation: https://docs.djangoproject.com/en/stable/
+- Django ORM: https://docs.djangoproject.com/en/stable/topics/db/models/
+- Django QuerySet API: https://docs.djangoproject.com/en/stable/ref/models/querysets/
+"""
 # from django.contrib.contenttypes.models import ContentType
 # # The commented lines in the code are importing various modules and classes from Django's database
 # models to perform operations on the database. Here is a breakdown of each import statement:
@@ -93,4 +114,4 @@ def farm(request):
     # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
     # queryset =  Product.objects.prefetch_related('promotions').select_related('collection').all()
     
-    return render(request, "index.html", {"name": "Hassan", 'result': list(queryset)})
+    return render(request, "index.html", {"name": "Hassan", 'result': list(queryset)}) 
