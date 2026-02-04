@@ -10,6 +10,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ['first_name','last_name','membership','ordered_products']
     list_editable = ['membership']
     list_per_page = 5
+    search_fields = ['first_name__istartswith' , 'last_name__istartswith']
     
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(
