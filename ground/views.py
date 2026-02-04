@@ -13,14 +13,17 @@ from tags.models import TaggedItem
 
 def farm(request):
     
-    content_type = ContentType.objects.get_for_model(Product)
+    TaggedItem.objects.get_tags_for(Product, 1)
     
-    quarry_set = TaggedItem.objects\
-    .select_related('tag')\
-        .filter(
-        content_type = content_type,
-        object_id = 1
-    )
+    
+    # content_type = ContentType.objects.get_for_model(Product)
+    
+    # quarry_set = TaggedItem.objects\
+    # .select_related('tag')\
+    #     .filter(
+    #     content_type = content_type,
+    #     object_id = 1
+    # )
     
     
     # discounted_price = ExpressionWrapper(F('unit_price')*0.8, output_field=DecimalField())
