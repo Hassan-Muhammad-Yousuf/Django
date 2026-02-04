@@ -1,13 +1,28 @@
 from django.contrib import admin
 from django.db.models import Count
+from django.utils.html import format_html , urlencode
+from django.urls import reverse
 from . import models
 # Register your models here.
 
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['first_name','last_name','membership']
+    list_display = ['first_name','last_name','membership','ordered_products']
     list_editable = ['membership']
     list_per_page = 5
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related(
+            'order_set__orderitem_set__product'
+        )
+    @admin.display(ordering='Ordered Products')   
+    def ordered_products(self, obj):
+        products = set()
+        for order in obj.order_set.all():
+            for item in order.orderitem_set.all():
+                products.add(item.product.title)  # use product.title instead of name
+        return ", ".join(products) if products else "-"
+
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -38,7 +53,15 @@ class CollectionAdmin(admin.ModelAdmin):
     
     @admin.display(ordering='products_count')
     def products_count(self, collection):
-        return collection.products_count
+        url = (
+            reverse('admin:store_product_changelist')
+            + '?'
+            + urlencode({
+                'collection__id': str(collection.id)
+            })
+            )
+        return format_html('<a href="{}">{}</a>', url, collection.products_count)
+        
     
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
