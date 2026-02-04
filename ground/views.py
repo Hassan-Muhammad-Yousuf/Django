@@ -8,6 +8,7 @@ from django.shortcuts import render
 from store.models import Product, Customer, OrderItem, Order, Collection
 # from tags.models import TaggedItem
 # from django.db import transaction
+from django.db import connection
 
 
 # Create your views here.
@@ -15,7 +16,12 @@ from store.models import Product, Customer, OrderItem, Order, Collection
 
 def farm(request):
 
-    queryset = Product.objects.raw('Select * From store_product')
+    # with connection as cursor:
+    #     # cursor.callproc('get_customers',[1001,1002])
+    #     # cursor.execute()
+
+
+    # queryset = Product.objects.raw('Select * From store_product')
 
     
     # with transaction.atomic():
