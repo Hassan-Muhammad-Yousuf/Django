@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Product, Collection
 from .serializers import ProductSerializer, CollectionSerializer
@@ -11,9 +12,24 @@ from django.db.models import Count
 
 # Create your views here.
 
-class ProductList(ListCreateAPIView):
-    queryset = Product.objects.select_related('collection').all()
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+    def delete(self, request, pk):
+        product = get_object_or_404(Product, pk = pk)
+        if product.orderitems.count() > 0:
+            return Response({'error :', 'Product cannot be deleted because it is associated with order items'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# class ProductList(ListCreateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
     
     
     # def get_queryset(self):
@@ -22,8 +38,8 @@ class ProductList(ListCreateAPIView):
     # def get_serializer_class(self):
     #     return ProductSerializer
     
-    def get_serializer_context(self):
-        return {'request': self.request}
+    # def get_serializer_context(self):
+    #     return {'request': self.request}
     
     # def get(self, request):
     #     queryset = Product.objects.select_related('collection').all()
@@ -64,9 +80,9 @@ class ProductList(ListCreateAPIView):
         # else:
         #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ProductDetails(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+# class ProductDetails(RetrieveUpdateDestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
         
     # def get(self, request, id):
     #     product = get_object_or_404(Product, pk = id)
@@ -80,13 +96,13 @@ class ProductDetails(RetrieveUpdateDestroyAPIView):
     #     serializer.save()
     #     return Response(serializer.data)
     
-    def delete(self, request, pk):
-        product = get_object_or_404(Product, pk = pk)
-        if product.orderitems.count() > 0:
-            return Response({'error :', 'Product cannot be deleted because it is associated with order items'},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def delete(self, request, pk):
+    #     product = get_object_or_404(Product, pk = pk)
+    #     if product.orderitems.count() > 0:
+    #         return Response({'error :', 'Product cannot be deleted because it is associated with order items'},
+    #             status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    #     product.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 # @api_view(['GET', 'PUT', 'DELETE'])
 # def product_detail(request, id):
