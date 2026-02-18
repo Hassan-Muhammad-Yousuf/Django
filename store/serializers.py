@@ -86,6 +86,12 @@ class AddCartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['id', 'product_id', 'quantity']
+        
+
+class UpdateCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['quantity']
 
     # def create(self, validated_data):
     #     product = Product(**validated_data)
