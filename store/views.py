@@ -7,7 +7,7 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from .pagination import DefaultPagination
 from .filter import ProductFilter
 from .models import Cart, CartItem, OrderItem, Product, Collection, Review
-from .serializers import CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer
 from django.db.models import Count
 
 # Create your views here.
@@ -75,7 +75,14 @@ class CartViewSet(CreateModelMixin,
     
 
 class CartItemViewSet(ModelViewSet):
-    serializer_class = CartItemSerializer
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        return CartItemSerializer
+    
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
     
     def get_queryset(self):
         return CartItem.objects.\
