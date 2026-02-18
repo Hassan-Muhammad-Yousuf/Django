@@ -51,7 +51,7 @@ class Product(models.Model):
         validators=[MinValueValidator(1)]
         )
     inventory = models.IntegerField(validators=[MinValueValidator(1)])
-    last_updates = models.DateTimeField(auto_now=True)
+    last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
     
