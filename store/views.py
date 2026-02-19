@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, FullDjangoModelPermissions, ViewCustomerHistoryPermission
 from .pagination import DefaultPagination
 from .filter import ProductFilter
 from .models import Cart, CartItem, Customer, OrderItem, Product, Collection, Review
@@ -103,6 +103,11 @@ class CustomerViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
     
     
+    @action(detail=True, permission_classes=[ViewCustomerHistoryPermission])
+    def history(self,request,pk):
+        return Response('ok')
+    
+    
     @action(detail=False, methods=['GET','PUT'], permission_classes = [IsAuthenticated])
     def me(self, request):
         (customer ,created) = Customer.objects.get_or_create(user_id = request.user.id)
@@ -114,11 +119,16 @@ class CustomerViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+
+
+
         
-    def get_permissions(self):
-        if self.action == 'me':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+        
+        
+    # def get_permissions(self):
+    #     if self.action == 'me':
+    #         return [AllowAny()]
+    #     return [IsAuthenticated()]
 
 
 
