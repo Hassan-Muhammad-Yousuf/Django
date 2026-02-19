@@ -27,3 +27,11 @@ urlpatterns = router.urls + products_router.urls + carts_router.urls
 #     path("collections/<int:pk>/", views.CollectionDetails.as_view(), name='collection-detail'),
 #     # path("collections/<int:pk>/", views.collection_details, name='collection-detail'),
 # ]
+
+
+
+
+# {
+#     "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3MTU5MjQ3MCwiaWF0IjoxNzcxNTA2MDcwLCJqdGkiOiI4YTEwMTEwNjUyNmY0ZjBjYmYxNTVlZWI1OTlkZTM3NCIsInVzZXJfaWQiOiIyIn0.CTnn9wfxSTW85Q-VifKk5cJlOaAfqPkO0mBDZ5Dpu6I",
+#     "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcxNTkyNDcwLCJpYXQiOjE3NzE1MDYwNzAsImp0aSI6IjY4NDdhMDgyNmYwNDQ5ZWRhNWM3NTU5ZGVhMWQwNDhjIiwidXNlcl9pZCI6IjIifQ.h0xRsl1WUbxStuy8yP1LDnTOodXpJ8vzbhWGp18p29A"
+# }
