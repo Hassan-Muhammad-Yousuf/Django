@@ -7,7 +7,7 @@ router.register('products', views.ProductViewSet, basename='product')
 router.register('collections', views.CollectionViewSet)
 router.register('carts', views.CartViewSet)
 router.register('customers', views.CustomerViewSet)
-router.register('orders', views.OrderViewSet)
+router.register('orders', views.OrderViewSet, basename='orders')
 
 
 products_router = routers.NestedDefaultRouter(router, 'products', lookup = 'product')
@@ -32,7 +32,8 @@ urlpatterns = router.urls + products_router.urls + carts_router.urls
 
 
 
+
 # {
-#     "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3MTU5MjQ3MCwiaWF0IjoxNzcxNTA2MDcwLCJqdGkiOiI4YTEwMTEwNjUyNmY0ZjBjYmYxNTVlZWI1OTlkZTM3NCIsInVzZXJfaWQiOiIyIn0.CTnn9wfxSTW85Q-VifKk5cJlOaAfqPkO0mBDZ5Dpu6I",
-#     "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcxNTkyNDcwLCJpYXQiOjE3NzE1MDYwNzAsImp0aSI6IjY4NDdhMDgyNmYwNDQ5ZWRhNWM3NTU5ZGVhMWQwNDhjIiwidXNlcl9pZCI6IjIifQ.h0xRsl1WUbxStuy8yP1LDnTOodXpJ8vzbhWGp18p29A"
+#     "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3MjAyMjM3MiwiaWF0IjoxNzcxOTM1OTcyLCJqdGkiOiIyNmY0MGU1NWNhMzc0OTM5ODY4ZDQwOWQ4ZWQzZmFhZSIsInVzZXJfaWQiOiIyIn0.qUCBfNO3UMuvnNhFCOJUSIesl-v6tqsE0quK2XSh_q0",
+#     "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcyMDIyMzcyLCJpYXQiOjE3NzE5MzU5NzIsImp0aSI6ImQxZmU4YjFkZjE2NzRhNzdiMDQ0NmMzNDgwNmQ5YTE0IiwidXNlcl9pZCI6IjIifQ.Ylk7mEe9adm5EGA3CphWCHN1fHMtLI6CkA2xkxte-88"
 # }
