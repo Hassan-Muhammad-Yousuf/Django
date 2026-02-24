@@ -9,8 +9,8 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from .permissions import IsAdminOrReadOnly, FullDjangoModelPermissions, ViewCustomerHistoryPermission
 from .pagination import DefaultPagination
 from .filter import ProductFilter
-from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, ProductImage, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
 from django.db.models import Count
 
 # Create your views here.
@@ -155,6 +155,15 @@ class OrderViewSet(ModelViewSet):
         customer_id =Customer.objects.only('id').get(user_id=user.id)
         return Order.objects.filter(customer_id = customer_id)
 
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']}
+
+    def get_queryset(self):
+        return ProductImage.objects.filter(product_id = self.kwargs['product_pk'])
 
         
         
