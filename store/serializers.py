@@ -108,6 +108,10 @@ class OrderItemSerialize(serializers.ModelSerializer):
         fields = ['id', 'product', 'unit_price', 'quantity']
 
 
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['payment_status']
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerialize(many = True)
     class Meta:
