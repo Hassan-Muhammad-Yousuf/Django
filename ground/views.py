@@ -31,6 +31,7 @@ References:
 from django.core.mail import EmailMessage, BadHeaderError
 from store.models import Product, Customer, OrderItem, Order, Collection
 from django.db import connection
+from templated_mail.mail import BaseEmailMessage
 
 
 # Create your views here.
@@ -38,9 +39,15 @@ from django.db import connection
 
 def farm(request):
     try:
-        message = EmailMessage('subject', 'message','test@gmail.com',['test2@gmail.com'])
-        message.attach_file('ground/static/images/test.jpg')
-        message.send()
+        message = BaseEmailMessage(
+            template_name =  'emails/hello.html',
+            context= {'name': 'Hassan'}
+        )
+        message.send(['hassan@gmail.com'])
+        
+        # message = EmailMessage('subject', 'message','test@gmail.com',['test2@gmail.com'])
+        # message.attach_file('ground/static/images/test.jpg')
+        # message.send()
         # mail_admins('subject','message', html_message='message')
         # send_mail('subject','message','admin@gmail.com',['admin2@gmail.com'])
     except BadHeaderError:
