@@ -28,7 +28,7 @@ References:
 # # from django.db.models.functions import Concat
 # from tags.models import TaggedItem
 # from django.db import transaction
-from django.core.mail import send_mail, mail_admins, BadHeaderError
+from django.core.mail import EmailMessage, BadHeaderError
 from store.models import Product, Customer, OrderItem, Order, Collection
 from django.db import connection
 
@@ -38,7 +38,10 @@ from django.db import connection
 
 def farm(request):
     try:
-        mail_admins('subject','message', html_message='message')
+        message = EmailMessage('subject', 'message','test@gmail.com',['test2@gmail.com'])
+        message.attach_file('ground/static/images/test.jpg')
+        message.send()
+        # mail_admins('subject','message', html_message='message')
         # send_mail('subject','message','admin@gmail.com',['admin2@gmail.com'])
     except BadHeaderError:
         pass
