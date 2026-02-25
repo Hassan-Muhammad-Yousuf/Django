@@ -26,9 +26,10 @@ References:
 # from django.db.models.aggregates import Count,Max,Min,Avg
 # from django.db.models import Value, F, Func, ExpressionWrapper, DecimalField
 # # from django.db.models.functions import Concat
-from store.models import Product, Customer, OrderItem, Order, Collection
 # from tags.models import TaggedItem
 # from django.db import transaction
+from django.core.mail import send_mail, mail_admins, BadHeaderError
+from store.models import Product, Customer, OrderItem, Order, Collection
 from django.db import connection
 
 
@@ -36,7 +37,16 @@ from django.db import connection
 
 
 def farm(request):
+    try:
+        mail_admins('subject','message', html_message='message')
+        # send_mail('subject','message','admin@gmail.com',['admin2@gmail.com'])
+    except BadHeaderError:
+        pass
 
+    return render(request, "index.html", {"name": "Hassan"}) 
+    
+    
+    
     # with connection as cursor:
     #     # cursor.callproc('get_customers',[1001,1002])
     #     # cursor.execute()
@@ -113,5 +123,3 @@ def farm(request):
     # result = Product.objects.filter(collection__id=1).aggregate(count = Count('id'), min_price = Min('unit_price'))
     # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
     # queryset =  Product.objects.prefetch_related('promotions').select_related('collection').all()
-    
-    return render(request, "index.html", {"name": "Hassan", 'result': list(queryset)}) 
