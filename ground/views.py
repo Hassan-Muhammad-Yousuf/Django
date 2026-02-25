@@ -1,4 +1,3 @@
-from django.shortcuts import render
 """
 views.py
 This module contains the view functions for the Django application, specifically for handling 
@@ -28,33 +27,36 @@ References:
 # # from django.db.models.functions import Concat
 # from tags.models import TaggedItem
 # from django.db import transaction
-from django.core.mail import EmailMessage, BadHeaderError
-from store.models import Product, Customer, OrderItem, Order, Collection
-from django.db import connection
-from templated_mail.mail import BaseEmailMessage
+# from django.core.mail import EmailMessage, BadHeaderError
+# from store.models import Product, Customer, OrderItem, Order, Collection
+# from django.db import connection
+# from templated_mail.mail import BaseEmailMessage
 
+from django.shortcuts import render
+from .task import notify_customer
 
 # Create your views here.
 
 
 def farm(request):
-    try:
-        message = BaseEmailMessage(
-            template_name =  'emails/hello.html',
-            context= {'name': 'Hassan'}
-        )
-        message.send(['hassan@gmail.com'])
-        
-        # message = EmailMessage('subject', 'message','test@gmail.com',['test2@gmail.com'])
-        # message.attach_file('ground/static/images/test.jpg')
-        # message.send()
-        # mail_admins('subject','message', html_message='message')
-        # send_mail('subject','message','admin@gmail.com',['admin2@gmail.com'])
-    except BadHeaderError:
-        pass
-
+    notify_customer.delay('Hello')
+    
     return render(request, "index.html", {"name": "Hassan"}) 
     
+    # try:
+    #     message = BaseEmailMessage(
+    #         template_name =  'emails/hello.html',
+    #         context= {'name': 'Hassan'}
+    #     )
+    #     message.send(['hassan@gmail.com'])
+        
+    #     # message = EmailMessage('subject', 'message','test@gmail.com',['test2@gmail.com'])
+    #     # message.attach_file('ground/static/images/test.jpg')
+    #     # message.send()
+    #     # mail_admins('subject','message', html_message='message')
+    #     # send_mail('subject','message','admin@gmail.com',['admin2@gmail.com'])
+    # except BadHeaderError:
+    #     pass
     
     
     # with connection as cursor:
