@@ -166,6 +166,14 @@ class CustomerAdmin(admin.ModelAdmin):
         return ", ".join(products) if products else "-"
 
 
+class ProductImageInline(admin.TabularInline):
+    model = models.ProductImage
+    readonly_fields = ['thumbnail']
+
+    def thumbnail(self, instance):
+        if instance.image.name != '':
+            return format_html('<img src="{}" class="thumbnail" />', instance.image.url)
+        return ''
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     search_fields = ['title']
@@ -175,6 +183,7 @@ class ProductAdmin(admin.ModelAdmin):
     }
     exclude = ['promotions']
     actions = ['clear_inventory']
+    inlines = [ProductImageInline]
     list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
     list_editable = ['unit_price']
     list_filter = ['collection', 'last_update', InventoryFilter]
@@ -198,6 +207,11 @@ class ProductAdmin(admin.ModelAdmin):
             f'{updated_count} products were successfully updated',
             messages.ERROR
         )
+        
+    class Media:
+        css = {
+            'all': ['store/style.css']
+        }
 
 
 class OrderItemInline(admin.TabularInline):
