@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "djoser",
+    "silk",
     "ground",
     "store",
     "tags",
@@ -63,6 +64,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# if DEBUG:
+#     MIDDLEWARE += "silk.middleware.SilkyMiddleware",
 
 INTERNAL_IPS = [
     # ...
@@ -105,6 +109,7 @@ DATABASES = {
         'PASSWORD': 'pass',
         'HOST': 'localhost',
         'PORT': '5432',
+        'CONN_MAX_AGE': 60,
     }
 }
 
