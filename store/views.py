@@ -36,8 +36,8 @@ class ProductViewSet(ModelViewSet):
         return {'request': self.request}
     
     def destroy(self, request, *args, **kwargs):
-        if OrderItem.object.filter(product_id = kwargs['pk']).count() > 0:
-            return Response({'error :', 'Product cannot be deleted because it is associated with order items'})
+        if OrderItem.objects.filter(product_id = kwargs['pk']).count() > 0:
+            return Response({'error :', 'Product cannot be deleted because it is associated with order items'}, status=status.HTTP_400_BAD_REQUEST)
         return super().destroy(request, *args, **kwargs)
     
     
