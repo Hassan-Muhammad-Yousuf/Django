@@ -34,20 +34,34 @@ References:
 
 from django.shortcuts import render
 from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from rest_framework.views import APIView
 import requests
 
 # Create your views here.
-
-
-def farm(request):
-    key = 'httpbin_result'
-    if cache.get(key) is None:
+class HelloView(APIView):
+    @method_decorator(cache_page(5*60))
+    def get(self, request):
         response =requests.get('https://httpbin.org/delay/2')
         data = response.json()
-        cache.set(key, data)
-    # notify_customer.delay('Hello')
+        return render(request, "index.html", {"name": 'hassan'}) 
+
+
+# @cache_page(5 * 60)
+# def farm(request):
     
-    return render(request, "index.html", {"name": cache.get(key)}) 
+#     response =requests.get('https://httpbin.org/delay/2')
+#     data = response.json()
+        
+        
+#     # if cache.get(key) is None:
+#     #     response =requests.get('https://httpbin.org/delay/2')
+#     #     data = response.json()
+#     #     cache.set(key, data)
+#     # notify_customer.delay('Hello')
+    
+#     return render(request, "index.html", {"name": data}) 
     
     # try:
     #     message = BaseEmailMessage(
