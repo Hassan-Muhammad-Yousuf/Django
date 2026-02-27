@@ -1,0 +1,87 @@
+:root {
+    --bg: #f6f7fb;
+    --text: #1f2933;
+    --muted: #606f7b;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --accent: #2f80ed;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.site-header {
+    text-align: center;
+    padding: 48px 24px 24px;
+}
+
+.site-header h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--muted);
+}
+
+.content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    gap: 20px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.card h2 {
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+}
+
+ul {
+    padding-left: 20px;
+    color: var(--muted);
+}
+
+.links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.links a {
+    text-decoration: none;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.links a:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.site-footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 24px;
+    font-size: 0.9rem;
+}

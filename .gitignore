@@ -51,3 +51,5 @@ staticfiles/
 .pytest_cache/
 .coverage
 htmlcov/
+
+/static/
