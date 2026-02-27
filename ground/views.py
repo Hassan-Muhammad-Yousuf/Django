@@ -33,15 +33,21 @@ References:
 # from templated_mail.mail import BaseEmailMessage
 
 from django.shortcuts import render
-from .task import notify_customer
+from django.core.cache import cache
+import requests
 
 # Create your views here.
 
 
 def farm(request):
-    notify_customer.delay('Hello')
+    key = 'httpbin_result'
+    if cache.get(key) is None:
+        response =requests.get('https://httpbin.org/delay/2')
+        data = response.json()
+        cache.set(key, data)
+    # notify_customer.delay('Hello')
     
-    return render(request, "index.html", {"name": "Hassan"}) 
+    return render(request, "index.html", {"name": cache.get(key)}) 
     
     # try:
     #     message = BaseEmailMessage(
