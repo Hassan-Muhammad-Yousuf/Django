@@ -1,0 +1,369 @@
+---
+# PROJECT OVERVIEW
+This is a Django monolith that mixes a learning sandbox (“ground”) with a real-ish e‑commerce API (“store”), user accounts (“core”), tagging/likes (generic relations), and operational add‑ons (Celery tasks, caching, logging, DRF, JWT auth). The main app exposes REST endpoints for products, collections, carts, orders, reviews, and product images, plus Django admin customizations and a small HTML landing page.
+
+---
+# PROJECT STRUCTURE
+- `manage.py` — Entry point for Django management commands; defaults to `front.settings.dev`.
+- `front/` — Project config and runtime entrypoints.
+  - `front/settings/common.py` — Shared settings: apps, middleware, REST framework, auth/JWT, email, caching, logging.
+  - `front/settings/dev.py` — Dev config: DEBUG, hardcoded SECRET_KEY, Postgres DB settings.
+  - `front/settings/prod.py` — Prod config: DEBUG False, SECRET_KEY from env, empty ALLOWED_HOSTS.
+  - `front/urls.py` — Root URL router; includes admin, core, ground, store, djoser, debug toolbar, silk.
+  - `front/asgi.py` / `front/wsgi.py` — ASGI/WSGI entrypoints.
+  - `front/celery.py` — Celery app configuration and autodiscovery.
+- `core/` — Custom user model and minimal homepage.
+  - `core/models.py` — Custom `User` extending `AbstractUser`, unique email.
+  - `core/serializers.py` — Djoser overrides for user creation/current user.
+  - `core/admin.py` — Custom User admin + overrides store Product admin to add tag editing.
+  - `core/urls.py` — TemplateView for `core/templates/core/index.html`.
+  - `core/templates/core/index.html` — Basic static homepage.
+  - `core/static/core/style.css` — Styling for homepage.
+  - `core/signals/handlers.py` — Receives order_created signal; prints order.
+- `store/` — Main e‑commerce domain + API.
+  - `store/models.py` — Promotions, collections, products, images, customers, orders, cart, reviews.
+  - `store/serializers.py` — DRF serializers for all resources + custom cart/order flows.
+  - `store/views.py` — DRF ViewSets for products, collections, carts, orders, etc.
+  - `store/urls.py` — DRF routers + nested routers for reviews/images/cart items.
+  - `store/admin.py` — Admin customization, filters, inline images, inventory actions.
+  - `store/permissions.py` — Custom permission classes.
+  - `store/filter.py` — django-filter FilterSet for Product.
+  - `store/pagination.py` — Default page size for DRF.
+  - `store/valiodators.py` — File size validator (typo in filename).
+  - `store/signals/handlers.py` — Auto-create Customer on new User.
+  - `store/migrations/` — DB schema history for store.
+  - `store/tests/` — pytest + DRF tests for products/collections.
+- `tags/` — Tagging system using generic relations.
+  - `tags/models.py` — `Tag`, `TaggedItem`, custom manager.
+  - `tags/admin.py` — Tag admin with search.
+- `likes/` — Generic “likes” via ContentTypes.
+  - `likes/models.py` — `LikedItems` generic relation.
+- `ground/` — Sandbox app for experiments and demos.
+  - `ground/views.py` — “HelloView” calling httpbin, logging, lots of commented ORM experiments.
+  - `ground/task.py` — Celery task example.
+  - `ground/templates/` — Simple HTML template and email template.
+- `locustfiles/browse_products.py` — Locust performance test against store endpoints.
+- `pytest.ini` — pytest config for Django settings.
+- `static/`, `media/` — Static and uploaded media roots.
+- `celerybeat-schedule.db` — Celery beat schedule database (checked in).
+
+---
+# ARCHITECTURE & DESIGN DECISIONS
+- **Architecture pattern:** Django monolith with multiple apps (MVT: Model‑View‑Template) plus DRF for API endpoints.
+- **API design:** DRF ViewSets + routers, including nested routers for product reviews/images and cart items (`store/urls.py`).
+- **Auth:** JWT via `djangorestframework-simplejwt` and Djoser for auth endpoints (`front/settings/common.py`).
+- **Async tasks:** Celery with Redis broker + beat schedule for periodic tasks (`front/celery.py`, `front/settings/common.py`, `ground/task.py`).
+- **Caching:** Django cache backed by Redis (`front/settings/common.py`).
+- **Admin emphasis:** Significant admin customizations for store operations (`store/admin.py`, `core/admin.py`).
+- **Generic relations:** Tags and likes use `ContentType` + `GenericForeignKey` (`tags/models.py`, `likes/models.py`).
+- **No dependency manifest:** No `requirements.txt`/`pyproject.toml` present; dependencies must be inferred from imports/settings.
+
+**Dependencies (inferred) and why they exist**
+- `Django` — core framework.
+- `djangorestframework` — REST API serializers/viewsets/routers (`store/serializers.py`, `store/views.py`).
+- `django-filter` — filter backends for product filtering (`store/filter.py`).
+- `django-cors-headers` — CORS handling (`front/settings/common.py`).
+- `djoser` — user registration/auth endpoints (`front/urls.py`, `core/serializers.py`).
+- `djangorestframework-simplejwt` — JWT auth (`front/settings/common.py`).
+- `django-debug-toolbar` — request debugging (`front/urls.py`, `front/settings/common.py`).
+- `django-silk` — performance profiling (`front/urls.py`, `front/settings/common.py`).
+- `whitenoise` — static file serving in production (`front/settings/common.py`).
+- `celery` — background tasks (`front/celery.py`, `ground/task.py`).
+- `redis` + `django-redis` — cache + broker (`front/settings/common.py`).
+- `requests` — external HTTP calls in `ground/views.py`.
+- `psycopg2` (or psycopg2‑binary) — Postgres DB backend (`front/settings/dev.py`).
+- `pytest`, `pytest-django` — tests (`pytest.ini`, `store/tests/`).
+- `model-bakery` — test data factories (`store/tests/`).
+- `locust` — load testing (`locustfiles/browse_products.py`).
+- Optional/commented: `templated-mail` (commented in `ground/views.py`).
+
+---
+# GIT HISTORY ANALYSIS
+Commit-by-commit evolution (hash, date, message, key change):
+- `5f77219` 2026-02-02 — Django Practice: initial project scaffolding, apps (`front`, `store`, `ground`, `likes`, `tags`), models, views, admin.
+- `fc7c1d3` 2026-02-04 — DB Instance with complex queries and expressions: `ground/views.py` experiments + template tweaks.
+- `6f2e77b` 2026-02-04 — progress: more ORM experiments in `ground/views.py`.
+- `cdf46ea` 2026-02-04 — Content Types: `ground/views.py` updates.
+- `dbfe948` 2026-02-04 — Customs Manager: custom manager work in `tags/models.py`, more in `ground/views.py`.
+- `83c0344` 2026-02-04 — cached Obj in DB: caching experiments in `ground/views.py`.
+- `748872c` 2026-02-04 — creating and deleting objects: ORM learning in `ground/views.py`.
+- `1f65237` 2026-02-04 — Updating objects: ORM updates in `ground/views.py`.
+- `43effe5` 2026-02-04 — Transaction Objects: transaction examples in `ground/views.py`.
+- `91bfbe5` 2026-02-04 — Raw Queries in Django: raw SQL in `ground/views.py`.
+- `e296e33` 2026-02-04 — Raw Queries in Django: further raw SQL in `ground/views.py`.
+- `99fb0be` 2026-02-04 — Customizing Admin Panel: admin + model tweaks (`store/admin.py`, `store/models.py`), URL changes.
+- `25add1e` 2026-02-04 — Customizing List Page in Admin Panel: admin list view enhancements.
+- `9cafddd` 2026-02-04 — Computing Columns in Admin Panel: computed columns in admin.
+- `c95d9bc` 2026-02-04 — Overriding base QuerySet in Admin Panel: admin query optimizations.
+- `9a8316d` 2026-02-04 — Providing Links to other pages...: admin links to related pages.
+- `c8e3061` 2026-02-04 — Adding Search to the Page List: admin search fields.
+- `97eba3d` 2026-02-04 — Adding Filtering to the Page List: admin filters.
+- `b466a50` 2026-02-04 — Adding Customs Actions in Admin Panel: admin actions.
+- `15f294f` 2026-02-04 — Customizing Form in Admin Panel: admin form changes.
+- `0980305` 2026-02-04 — Adding Data Validation in Admin Panel: model validation + migration.
+- `97d39cc` 2026-02-04 — Editing Children Using inline in Admin Panel: inline admin changes.
+- `472004a` 2026-02-04 — Generic Relations in Admin Panel: tags admin + generic relations.
+- `cd11382` 2026-02-04 — Extending Pluggable Apps in Admin Panel: introduces then later removes `store_custom`.
+- `7b755a0` 2026-02-04 — Adding Documentation: docstrings added to `store/admin.py`, `store/models.py`, `ground/views.py`.
+- `b8ba548` 2026-02-12 — Django RestFramework: adds DRF, API URLs (`front/urls.py`, `store/views.py`).
+- `52cd710` 2026-02-12 — DRF Serializers: adds `store/serializers.py`.
+- `450f372` 2026-02-12 — Serializing Objects: serializer + settings updates.
+- `a45cefc` 2026-02-12 — Custom Serializing of Objects: serializer customization.
+- `2878f46` 2026-02-12 — Serializing Related Fields: nested fields + routers.
+- `8e8a546` 2026-02-12 — Serializing Models: model serializers.
+- `2927f10` 2026-02-12 — DeSerializing Objects: API create/update flows.
+- `ca37d3e` 2026-02-12 — Validate Data: serializer validation.
+- `a48741c` 2026-02-17 — Saving Objects: serializer save logic.
+- `a8fda79` 2026-02-17 — Deleting Objects: delete logic/constraints.
+- `da586e9` 2026-02-17 — Collection API: full collection endpoints.
+- `b3275bc` 2026-02-17 — Class-based Views: API refactor.
+- `4d197b8` 2026-02-17 — Generic Views: more DRF refactor.
+- `54bd29a` 2026-02-17 — Generic Views: continuation.
+- `6f6e10c` 2026-02-17 — ViewSet: switch to viewsets.
+- `cda67e5` 2026-02-17 — Routers: DRF routers.
+- `017fd1f` 2026-02-18 — Generic Views: model migration adjustments.
+- `7a8d658` 2026-02-18 — Nested Routers: product reviews/images and cart items.
+- `557e119` 2026-02-18 — Filtering: filters in API.
+- `e313016` 2026-02-18 — Generic Filtering: adds `django-filter` and product filter.
+- `d5b3c7e` 2026-02-18 — Search Filtering: DRF search.
+- `9b5eba7` 2026-02-18 — Sort Filtering: ordering + model rename.
+- `8d4a90f` 2026-02-18 — Pagination: API pagination.
+- `4873598` 2026-02-18 — Adjusting Database: migration cleanup and model changes.
+- `6040218` 2026-02-18 — Cart API: cart endpoints.
+- `056b1e7` 2026-02-18 — Creating Cart: cart creation.
+- `bd37df3` 2026-02-18 — Deleting and updating CartItems: cart item update/delete.
+- `b0bdfa2` 2026-02-18 — Adding CartItems: cart item create.
+- `4cd754c` 2026-02-18 — updating CartItems: cart item patch.
+- `8969df7` 2026-02-19 — user data model: introduces `core` app and custom user, removes `store_custom`.
+- `4506b1c` 2026-02-19 — store customer model: Customer model updated.
+- `e60a5b8` 2026-02-19 — Customs Group and Permission: permissions in Order.
+- `31af73f` 2026-02-19 — Authentication via djoser: auth endpoints wiring.
+- `2325586` 2026-02-19 — Registering User: custom user serializers.
+- `612e534` 2026-02-19 — Customer Profile API: `/customers/me/` endpoint.
+- `fa84c28` 2026-02-19 — Logging in: auth URL updates.
+- `c8b356f` 2026-02-19 — Auth and Update User Profile: serializers + profile update.
+- `0bf0153` 2026-02-19 — Permissions for Users: permission changes in views.
+- `f75e9b4` 2026-02-19 — Custom Permissions: adds `store/permissions.py`.
+- `359f4f4` 2026-02-19 — Custom Model Permissions: adds model permissions + updates.
+- `2bd5906` 2026-02-23 — Orders API Getting the Orders: order endpoints.
+- `c91e69d` 2026-02-24 — Orders API Applying Permissions: order auth changes.
+- `1296916` 2026-02-24 — Orders API Creating an Order: order creation flow.
+- `1cf3f89` 2026-02-24 — Orders API Creating Order Items: order item creation.
+- `ea6ed96` 2026-02-24 — Orders API Returning the Created Order: response shape update.
+- `6960ed0` 2026-02-24 — Orders API Data validation: order validation.
+- `099516f` 2026-02-24 — Orders API Adjusting Permissions: permission tweaks.
+- `876b1e9` 2026-02-24 — Orders API Updating Orders: PATCH support.
+- `2d03b19` 2026-02-24 — Orders API Signals: order signal hooks.
+- `f6fec5c` 2026-02-24 — Orders API Custom Signals: move signals to handlers + core listener.
+- `76e47c6` 2026-02-24 — Managing Media Files: media settings/URLs.
+- `f91b24b` 2026-02-24 — creating Media Model: product images.
+- `d2a7b31` 2026-02-24 — creating Uploading Image API: images API endpoints.
+- `dcd6ec9` 2026-02-24 — creating Uploading Image API: further updates.
+- `b981afa` 2026-02-24 — Validating Uploading files: file size validation.
+- `d332077` 2026-02-25 — CORS headers + admin image setup: CORS and image thumbnails.
+- `7b8ebf9` 2026-02-25 — Fake SMTP server + email backend: email config and usage.
+- `a30d041` 2026-02-25 — attaching file in emails: email attachment + image file.
+- `eb6b6bc` 2026-02-25 — email templates: templated email example.
+- `f5c7f82` 2026-02-25 — celery with redis: Celery config.
+- `5859c47` 2026-02-25 — celery background task: task in `ground/task.py`.
+- `7a0ee53` 2026-02-25 — celery beat: schedule config and db file.
+- `28565a6` 2026-02-25 — first test: pytest + collection tests.
+- `c865384` 2026-02-26 — testing collections: test fixtures.
+- `b81c6eb` 2026-02-26 — testing collections complete: additional tests.
+- `e5a4609` 2026-02-26 — testing Product complete: product tests.
+- `cf2ad90` 2026-02-26 — performance test via Locust: load testing.
+- `a19212e` 2026-02-26 — using silk to optimize querysets: profiling tool.
+- `1b2b7bc` 2026-02-27 — Low Level Cache API: redis cache usage.
+- `5f60f50` 2026-02-27 — Caching Views: cache decorators.
+- `1b8d3d5` 2026-02-27 — core module + logging: adds core templates/static and logging config.
+- `4e5563b` 2026-02-27 — Enhance logging + error handling: logger wiring in `ground/views.py`.
+- `84691df` 2026-02-27 — Refactor settings: split dev/prod/common.
+
+**Patterns in development**
+- Incremental, tutorial-style progression with focused commits (admin → DRF → auth → orders → media → async → tests).
+- Frequent refactors from function views → class‑based views → viewsets/routers.
+- Heavy admin and ORM exploration in `ground/views.py`.
+- Tests added late, focused on core CRUD.
+
+---
+# CORE CONCEPTS EXPLAINED
+- **Django MVT (Model‑View‑Template)**
+  - What: Django’s variation of MVC: Models handle data, Views handle logic, Templates handle UI.
+  - Why: Standard Django structure.
+  - How: Models in `store/models.py`, views in `store/views.py`, templates in `core/templates/...`.
+  - Analogy: Kitchen (models), chef (views), plated dish (templates).
+- **Django ORM**
+  - What: Python API for DB queries.
+  - Why: Avoid raw SQL, consistent model access.
+  - How: `Product.objects...` in `store/views.py` and `ground/views.py`.
+  - Analogy: Using a translator instead of speaking a foreign language directly.
+- **DRF ViewSets + Routers**
+  - What: Bundled CRUD endpoints with routing helpers.
+  - Why: Rapid API creation with consistent URL patterns.
+  - How: `ModelViewSet` in `store/views.py`, `DefaultRouter` in `store/urls.py`.
+  - Analogy: A vending machine that exposes all buttons (list, create, update, delete) for a product.
+- **Serializers**
+  - What: Convert model instances to/from JSON and validate input.
+  - Why: API input/output consistency and validation.
+  - How: `ProductSerializer`, `CreateOrderSerializer` in `store/serializers.py`.
+  - Analogy: A customs checkpoint translating and inspecting items in transit.
+- **Nested Routers**
+  - What: URLs for resources tied to parent resources.
+  - Why: Scoped endpoints like `/products/{id}/reviews/`.
+  - How: `rest_framework_nested` in `store/urls.py`.
+  - Analogy: A subfolder inside a folder.
+- **Permissions**
+  - What: Rules controlling access to endpoints.
+  - Why: Separate admin vs normal user actions.
+  - How: `IsAdminOrReadOnly` in `store/permissions.py`, used in `store/views.py`.
+  - Analogy: Staff‑only doors in a store.
+- **JWT Authentication**
+  - What: Token‑based auth for APIs.
+  - Why: Stateless auth for API clients.
+  - How: `SIMPLE_JWT` in `front/settings/common.py`, Djoser endpoints in `front/urls.py`.
+  - Analogy: A wristband that grants access without re‑checking ID.
+- **Signals**
+  - What: Event hooks on model actions.
+  - Why: Side effects like creating Customer or notifying on order.
+  - How: `store/signals/handlers.py`, `core/signals/handlers.py`, `order_created` signal.
+  - Analogy: A doorbell that triggers other devices.
+- **Generic Relations**
+  - What: One table linking to multiple model types using ContentTypes.
+  - Why: Tags/likes for any model.
+  - How: `tags/models.py`, `likes/models.py`.
+  - Analogy: A universal adapter that fits many devices.
+- **Celery Tasks + Beat**
+  - What: Background job processing + scheduling.
+  - Why: Async email or long tasks.
+  - How: `front/celery.py`, `ground/task.py`, `CELERY_BEAT_SCHEDULE` in settings.
+  - Analogy: A mailroom that handles deliveries while the front desk stays open.
+- **Caching with Redis**
+  - What: Store computed data in memory for speed.
+  - Why: Reduce DB or external calls.
+  - How: `CACHES` in `front/settings/common.py`, `cache` in `ground/views.py`.
+  - Analogy: Keeping frequently used tools on the desk instead of the closet.
+- **Django Admin Customization**
+  - What: Tailoring admin UI with filters, inline edits, actions.
+  - Why: Better data management for store staff.
+  - How: `store/admin.py` and `core/admin.py`.
+  - Analogy: A custom control panel instead of a generic one.
+
+---
+# FULL PROJECT WALKTHROUGH
+1. **Entry point**
+   - Management commands go through `manage.py` (settings `front.settings.dev`).
+   - Web requests enter via `front/wsgi.py` (WSGI) or `front/asgi.py` (ASGI).
+2. **Root routing**
+   - `front/urls.py` routes:
+     - `/admin/` → Django admin.
+     - `/` → `core/urls.py` (static homepage).
+     - `/ground/` → `ground/urls.py` (sandbox).
+     - `/store/` → `store/urls.py` (main API).
+     - `/auth/` → Djoser auth routes (JWT).
+3. **Core homepage**
+   - `core/urls.py` serves `core/templates/core/index.html`, styled by `core/static/core/style.css`.
+4. **Ground sandbox**
+   - `ground/urls.py` maps `/ground/hello/` to `HelloView`.
+   - `ground/views.py` calls httpbin via `requests` and renders `ground/templates/index.html`.
+5. **Store API**
+   - **Products:** `ProductViewSet` in `store/views.py` handles list/create/update/delete, filtering, searching, pagination; uses `ProductSerializer`.
+   - **Collections:** `CollectionViewSet` supports product counts and delete protection.
+   - **Reviews:** `ReviewViewSet` uses nested router to scope reviews by product.
+   - **Carts:** `CartViewSet` (create/retrieve/delete) and `CartItemViewSet` for line items.
+   - **Customers:** `CustomerViewSet` with `/customers/me/` for current profile.
+   - **Orders:** `OrderViewSet` supports creating orders from carts and admin‑only updates/deletes.
+   - **Product images:** `ProductImageViewSet` handles uploads.
+6. **Data models**
+   - `store/models.py` defines the e‑commerce domain.
+   - Relationships: Collection → Products, Orders → Items → Products, Cart → Items, Product → Images/Reviews.
+7. **Signals**
+   - New User creates Customer (`store/signals/handlers.py`).
+   - Order creation emits `order_created`, consumed in `core/signals/handlers.py`.
+8. **Auth**
+   - Custom user model in `core/models.py`.
+   - Djoser uses custom serializers in `core/serializers.py`.
+9. **Background tasks**
+   - `front/celery.py` configures Celery.
+   - `ground/task.py` defines `notify_customer`.
+10. **Testing**
+   - pytest configured in `pytest.ini`, focused on products/collections (`store/tests/...`).
+11. **Performance testing**
+   - Locust script in `locustfiles/browse_products.py` simulates browsing and cart usage.
+
+---
+# KEY IMPLEMENTATION DETAILS
+- **Hardcoded secrets and settings:** `SECRET_KEY` hardcoded in `front/settings/dev.py`; `ALLOWED_HOSTS` empty in `front/settings/prod.py`.
+- **CORS origin uses https on localhost:** `CORS_ALLOWED_ORIGINS` in `front/settings/common.py` is `https://127.0.0.1:8001`; may need `http://` for local dev.
+- **JWT auth header type:** `SIMPLE_JWT` uses `AUTH_HEADER_TYPES = ('JWT',)` not the default `Bearer`.
+- **Media uploads:** `ProductImage.image` uses `validate_file_size` in `store/valiodators.py`; note typo in filename.
+- **File size math:** `validate_file_size` uses `1004` not `1024` bytes per KB.
+- **Order creation is transactional:** `CreateOrderSerializer.save()` uses `transaction.atomic()` to create order + items and delete cart.
+- **Signals are partially wired:** `store/apps.py` loads `store.signals.handlers`, `core/apps.py` does not appear to load `core.signals.handlers` (currently imported in `core/apps.py` only if added; check if `core/apps.py` actually registers signals).
+- **Potential missing permissions:** Many ViewSets rely on default permission classes (none set in settings), meaning public access unless a class explicitly sets permissions.
+- **Error handling gaps:** `CustomerViewSet.me` and `OrderViewSet.get_queryset` assume a `Customer` exists; will raise if not created.
+- **External call without timeout:** `requests.get` in `ground/views.py` lacks a timeout.
+- **Git includes runtime artifacts:** `celerybeat-schedule.db` is checked in.
+
+---
+# COMMANDS & WORKFLOWS
+- **Create/activate venv:** not in repo; likely `python -m venv django-env` then `source django-env/bin/activate`.
+- **Install deps (inferred):**
+  ```bash
+  pip install django djangorestframework django-filter django-cors-headers djoser djangorestframework-simplejwt django-debug-toolbar django-silk whitenoise celery redis django-redis requests pytest pytest-django model-bakery locust psycopg2-binary
+  ```
+- **Database setup (dev):**
+  - Postgres must have DB/user from `front/settings/dev.py`.
+  - Run migrations:
+    ```bash
+    python manage.py migrate
+    ```
+- **Run server:**
+  ```bash
+  python manage.py runserver
+  ```
+- **Create admin user:**
+  ```bash
+  python manage.py createsuperuser
+  ```
+- **Run tests:**
+  ```bash
+  pytest
+  ```
+- **Run Celery worker:**
+  ```bash
+  celery -A front worker -l info
+  ```
+- **Run Celery beat:**
+  ```bash
+  celery -A front beat -l info
+  ```
+- **Run Locust:**
+  ```bash
+  locust -f locustfiles/browse_products.py
+  ```
+
+---
+# WHAT TO STUDY NEXT
+1. **Django REST Framework ViewSets & Routers** — Core API structure. Resource: DRF official docs.
+2. **Django ORM relationships & query optimization** — Drives data flow. Resource: Django ORM docs.
+3. **JWT authentication with Djoser** — Auth flow specifics. Resource: Djoser docs + SimpleJWT docs.
+4. **Django Signals** — User/order automation. Resource: Django signals docs.
+5. **Celery + Redis** — Background task processing. Resource: Celery docs.
+6. **Generic Relations (ContentTypes)** — Tags/likes system. Resource: Django contenttypes docs.
+7. **Django Admin customization** — Large part of the codebase. Resource: Django admin docs.
+8. **Caching (django-redis)** — Performance. Resource: django-redis docs.
+9. **Testing with pytest + DRF** — Existing tests. Resource: pytest-django docs.
+
+---
+# QUICK REFERENCE CARD
+- **Entry points:** `manage.py`, `front/wsgi.py`, `front/asgi.py`
+- **Main API app:** `store/` (models, serializers, viewsets, urls)
+- **Auth:** Djoser + SimpleJWT (`front/settings/common.py`, `core/serializers.py`)
+- **Data models:** `store/models.py`, `core/models.py`, `tags/models.py`, `likes/models.py`
+- **Signals:** `store/signals/handlers.py`, `core/signals/handlers.py`
+- **Admin:** `store/admin.py`, `core/admin.py`
+- **Settings:** `front/settings/common.py`, `front/settings/dev.py`, `front/settings/prod.py`
+- **Tests:** `store/tests/test_products.py`, `store/tests/test_collections.py`
+- **Background tasks:** `front/celery.py`, `ground/task.py`
+- **Performance testing:** `locustfiles/browse_products.py`
+---

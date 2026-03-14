@@ -1,56 +1,48 @@
-# ======================
-# Python
-# ======================
+# Python bytecode / caches
 __pycache__/
 *.py[cod]
 *.so
 .Python
-__init__.py
 
 
-# ======================
-# Virtual Environments
-# ======================
+# Virtual environments
 django-env/
 venv/
 env/
 .venv/
 
-# ======================
-# Django
-# ======================
+# Django / runtime artifacts
 db.sqlite3
 db.sqlite3-journal
 *.log
 local_settings.py
 /media/
 staticfiles/
+celerybeat-schedule.db
+celerybeat.pid
+/static/
+general.log
 
-# ======================
-# Environment Variables
-# ======================
+# Environment variables
 .env
 .env.*
 
-# ======================
-# IDE / Editor
-# ======================
+# Editors / IDEs
 .vscode/
 .idea/
 *.swp
 *~
 
-# ======================
 # macOS
-# ======================
 .DS_Store
 
-# ======================
-# Testing / Coverage
-# ======================
+# Testing / coverage / tooling
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
-
-/static/
-general.log
+/.mypy_cache/
+/.ruff_cache/
+/.tox/
+/build/
+/dist/
